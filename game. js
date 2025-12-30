@@ -1,0 +1,132 @@
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const ui = document.getElementById('ui');
+const overlay = document.getElementById('overlay');
+
+let w, h, laneW;
+let gameActive = false;
+let score = 0, coins = 0, speed = 6;
+
+let player = { lane: 1, x: 0, jumpY: 0, vY: 0, jumping: false };
+let obstacles = [];
+let items = [];
+
+function init() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    laneW = Math.min(w / 3.5, 130);
+    player.x = w / 2;
+}
+window.addEventListener('resize', init);
+init();
+
+/* INPUT */
+window.addEventListener('keydown', (e) => {
+    if (!gameActive) {
+        if (e.key === "Enter" || e.code === "Space") startGame();
+        return;
+    }
+
+    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code)) {
+        e.preventDefault();
+    }
+
+    if (e.key === 'ArrowLeft' && player.lane > 0) player.lane--;
+    if (e.key === 'ArrowRight' && player.lane < 2) player.lane++;
+    if ((e.key === 'ArrowUp' || e.code === 'Space') && !player.jumping) {
+        player.jumping = true;
+        player.vY = 16;
+    }
+});
+
+window.addEventListener('mousedown', (e) => {
+    if (!gameActive) return;
+    const x = e.clientX;
+    if (x < w * 0.3 && player.lane > 0) player.lane--;
+    else if (x > w * 0.7 && player.lane < 2) player.lane++;
+    else if (!player.jumping) {
+        player.jumping = true;
+        player.vY = 16;
+    }
+});
+
+overlay.onclick = startGame;
+
+function startGame() {
+    score = 0; coins = 0; speed = 6;
+    obstacles = []; items = [];
+    player.lane = 1;
+    gameActive = true;
+    overlay.style.display = 'none';
+    animate();
+}
+
+function spawn() {
+    let lane = Math.floor(Math.random() * 3);
+    if (Math.random() < 0.04) obstacles.push({ lane, z: h });
+    if (Math.random() < 0.06) items.push({ lane, z: h });
+}
+
+function update() {
+    score++;
+    if (score % 400 === 0) speed += 0.4;
+
+    let targetX = (w / 2 - laneW) + (player.lane * laneW);
+    player.x += (targetX - player.x) * 0.2;
+
+    if (player.jumping) {
+        player.jumpY += player.vY;
+        player.vY -= 0.8;
+        if (player.jumpY <= 0) {
+            player.jumpY = 0;
+            player.jumping = false;
+        }
+    }
+
+    [obstacles, items].forEach((list, isCoin) => {
+        for (let i = list.length - 1; i >= 0; i--) {
+            list[i].z -= speed;
+            if (list[i].z < 160 && list[i].z > 60 && player.lane === list[i].lane) {
+                if (isCoin) {
+                    coins++;
+                    list.splice(i, 1);
+                } else if (player.jumpY < 45) {
+                    gameActive = false;
+                    overlay.style.display = 'flex';
+                    overlay.innerHTML =
+                        `<h1>CRASHED!</h1>
+                         <p>Score: ${Math.floor(score/10)} | Coins: ${coins}</p>
+                         <div class="btn">RESTART</div>`;
+                }
+            }
+            if (list[i] && list[i].z < -100) list.splice(i, 1);
+        }
+    });
+
+    if (Math.random() < 0.05) spawn();
+    ui.innerText = `Score: ${Math.floor(score/10)} | Coins: ${coins}`;
+}
+
+function drawCar(x, y, color, isPlayer) {
+    let w = 45, h = 75;
+    ctx.fillStyle = color;
+    ctx.fillRect(x - w/2, y - h, w, h);
+}
+
+function draw() {
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#34495e';
+    ctx.fillRect(w/2 - laneW*1.5, 0, laneW*3, h);
+
+    drawCar(player.x, h - 100 - player.jumpY, '#2ecc71', true);
+    obstacles.forEach(o =>
+        drawCar((w/2 - laneW) + (o.lane * laneW), h - o.z, '#e74c3c')
+    );
+}
+
+function animate() {
+    if (!gameActive) return;
+    update();
+    draw();
+    requestAnimationFrame(animate);
+}

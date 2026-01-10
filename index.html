@@ -1,48 +1,4 @@
-
-<html lang="en">
-
-  <head>
-    <meta charset="UTF-8">
-    <title>Untitled</title>
-    
-
-  </head>
-    
-  <body>
-  <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Subway Car Racer Fixed</title>
-    <style>
-        body { margin: 0; overflow: hidden; background: #2c3e50; font-family: sans-serif; touch-action: none; }
-        canvas { display: block; background: linear-gradient(#87CEEB, #2c3e50); }
-        #ui {
-            position: absolute; top: 10px; width: 100%; text-align: center;
-            color: white; font-size: 22px; font-weight: bold; pointer-events: none;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-        #overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
-            justify-content: center; align-items: center; color: white; cursor: pointer;
-            z-index: 10;
-        }
-        .btn { background: #e74c3c; padding: 15px 30px; border-radius: 10px; margin-top: 15px; font-size: 20px; font-weight: bold; border: 2px solid white; }
-    </style>
-</head>
-<body>
-
-    <div id="ui">Score: 0 | Coins: 0</div>
-    
-    <div id="overlay" onclick="startGame()">
-        <h1>CAR SURFER</h1>
-        <p>Use ARROW KEYS or CLICK Left/Right</p>
-        <div class="btn">CLICK TO START</div>
-    </div>
-
-    <canvas id="gameCanvas"></canvas>
+gameCanvas"></canvas>
 
 <script>
     const canvas = document.getElementById('gameCanvas');
